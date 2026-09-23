@@ -1,69 +1,607 @@
-# Prerequisites
-*.d
+//JUKEBOX WIP
 
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
+int currentSong = 0;
+int noteDuration;
+unsigned long noteStartTime = 0;
+unsigned long pauseStartTime = 0;
 
-# Precompiled Headers
-*.gch
-*.pch
+int noteIndex = 0;
 
-# Linker files
-*.ilk
+bool notePlaying = false;
 
-# Debugger Files
-*.pdb
+const int backButton = 6;
+const int pauseButton = 7;
+const int nextButton = 9;
 
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-*.so.*
+bool paused = false;
+
+#define REST 0
+#define B0 31
+#define C1 33
+#define CS1 35
+#define D1 37
+#define DS1 39
+#define E1 41
+#define F1 44
+#define FS1 46
+#define G1 49
+#define GS1 52
+#define A1 55
+#define AS1 58
+#define B1 62
+#define C2 65
+#define CS2 69
+#define D2 73
+#define DS2 78
+#define E2 82
+#define F2 87
+#define FS2 93
+#define G2 98
+#define GS2 104
+#define A2 110
+#define AS2 117
+#define B2 123
+#define C3 131
+#define CS3 139
+#define D3 147
+#define DS3 156
+#define E3 165
+#define F3 175
+#define FS3 185
+#define G3 196
+#define GS3 208
+#define A3 220
+#define AS3 233
+#define B3 247
+#define C4 262
+#define CS4 277
+#define D4 294
+#define DS4 311
+#define E4 330
+#define F4 349
+#define FS4 370
+#define G4 392
+#define GS4 415
+#define A4 440
+#define AS4 466
+#define B4 494
+#define C5 523
+#define CS5 554
+#define D5 587
+#define DS5 622
+#define E5 659
+#define F5 698
+#define FS5 740
+#define G5 784
+#define GS5 831
+#define A5 880
+#define AS5 932
+#define B5 988
+#define C6 1047
+#define CS6 1109
+#define D6 1175
+#define DS6 1245
+#define E6 1319
+#define F6 1397
+#define FS6 1480
+#define G6 1568
+#define GS6 1661
+#define A6 1760
+#define AS6 1865
+#define B6 1976
+#define C7 2093
+#define CS7 2217
+#define D7 2349
+#define DS7 2489
+#define E7 2637
+#define F7 2794
+#define FS7 2960
+#define G7 3136
+#define GS7 3322
+#define A7 3520
+#define AS7 3729
+#define B7 3951
+#define C8 4186
+#define CS8 4435
+#define D8 4699
+#define DS8 4978
+#define NOTE_B0  31
+#define NOTE_C1  33
+#define NOTE_CS1 35
+#define NOTE_D1  37
+#define NOTE_DS1 39
+#define NOTE_E1  41
+#define NOTE_F1  44
+#define NOTE_FS1 46
+#define NOTE_G1  49
+#define NOTE_GS1 52
+#define NOTE_A1  55
+#define NOTE_AS1 58
+#define NOTE_B1  62
+#define NOTE_C2  65
+#define NOTE_CS2 69
+#define NOTE_D2  73
+#define NOTE_DS2 78
+#define NOTE_E2  82
+#define NOTE_F2  87
+#define NOTE_FS2 93
+#define NOTE_G2  98
+#define NOTE_GS2 104
+#define NOTE_A2  110
+#define NOTE_AS2 117
+#define NOTE_B2  123
+#define NOTE_C3  131
+#define NOTE_CS3 139
+#define NOTE_D3  147
+#define NOTE_DS3 156
+#define NOTE_E3  165
+#define NOTE_F3  175
+#define NOTE_FS3 185
+#define NOTE_G3  196
+#define NOTE_GS3 208
+#define NOTE_A3  220
+#define NOTE_AS3 233
+#define NOTE_B3  247
+#define NOTE_C4  262
+#define NOTE_CS4 277
+#define NOTE_D4  294
+#define NOTE_DS4 311
+#define NOTE_E4  330
+#define NOTE_F4  349
+#define NOTE_FS4 370
+#define NOTE_G4  392
+#define NOTE_GS4 415
+#define NOTE_A4  440
+#define NOTE_AS4 466
+#define NOTE_B4  494
+#define NOTE_C5  523
+#define NOTE_CS5 554
+#define NOTE_D5  587
+#define NOTE_DS5 622
+#define NOTE_E5  659
+#define NOTE_F5  698
+#define NOTE_FS5 740
+#define NOTE_G5  784
+#define NOTE_GS5 831
+#define NOTE_A5  880
+#define NOTE_AS5 932
+#define NOTE_B5  988
+#define NOTE_C6  1047
+#define NOTE_CS6 1109
+#define NOTE_D6  1175
+#define NOTE_DS6 1245
+#define NOTE_E6  1319
+#define NOTE_F6  1397
+#define NOTE_FS6 1480
+#define NOTE_G6  1568
+#define NOTE_GS6 1661
+#define NOTE_A6  1760
+#define NOTE_AS6 1865
+#define NOTE_B6  1976
+#define NOTE_C7  2093
+#define NOTE_CS7 2217
+#define NOTE_D7  2349
+#define NOTE_DS7 2489
+#define NOTE_E7  2637
+#define NOTE_F7  2794
+#define NOTE_FS7 2960
+#define NOTE_G7  3136
+#define NOTE_GS7 3322
+#define NOTE_A7  3520
+#define NOTE_AS7 3729
+#define NOTE_B7  3951
+#define NOTE_C8  4186
+#define NOTE_CS8 4435
+#define NOTE_D8  4699
+#define NOTE_DS8 4978
+#define REST      0
+
+#include <LiquidCrystal.h>
+#include <avr/pgmspace.h>
+
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+
+int buzzer = 8;
+
+// Your complete melody array goes here
+const int melody1[] PROGMEM = {
+    
+NOTE_D5,-4, NOTE_E5,-4, NOTE_A4,4, //1
+  NOTE_E5,-4, NOTE_FS5,-4, NOTE_A5,16, NOTE_G5,16, NOTE_FS5,8,
+  NOTE_D5,-4, NOTE_E5,-4, NOTE_A4,2,
+  NOTE_A4,16, NOTE_A4,16, NOTE_B4,16, NOTE_D5,8, NOTE_D5,16,
+  NOTE_D5,-4, NOTE_E5,-4, NOTE_A4,4, //repeat from 1
+  NOTE_E5,-4, NOTE_FS5,-4, NOTE_A5,16, NOTE_G5,16, NOTE_FS5,8,
+  NOTE_D5,-4, NOTE_E5,-4, NOTE_A4,2,
+  NOTE_A4,16, NOTE_A4,16, NOTE_B4,16, NOTE_D5,8, NOTE_D5,16,
+  REST,4, NOTE_B4,8, NOTE_CS5,8, NOTE_D5,8, NOTE_D5,8, NOTE_E5,8, NOTE_CS5,-8,
+  NOTE_B4,16, NOTE_A4,2, REST,4, 
+
+  REST,8, NOTE_B4,8, NOTE_B4,8, NOTE_CS5,8, NOTE_D5,8, NOTE_B4,4, NOTE_A4,8, //7
+  NOTE_A5,8, REST,8, NOTE_A5,8, NOTE_E5,-4, REST,4, 
+  NOTE_B4,8, NOTE_B4,8, NOTE_CS5,8, NOTE_D5,8, NOTE_B4,8, NOTE_D5,8, NOTE_E5,8, REST,8,
+  REST,8, NOTE_CS5,8, NOTE_B4,8, NOTE_A4,-4, REST,4,
+  REST,8, NOTE_B4,8, NOTE_B4,8, NOTE_CS5,8, NOTE_D5,8, NOTE_B4,8, NOTE_A4,4,
+  NOTE_E5,8, NOTE_E5,8, NOTE_E5,8, NOTE_FS5,8, NOTE_E5,4, REST,4,
+   
+  NOTE_D5,2, NOTE_E5,8, NOTE_FS5,8, NOTE_D5,8, //13
+  NOTE_E5,8, NOTE_E5,8, NOTE_E5,8, NOTE_FS5,8, NOTE_E5,4, NOTE_A4,4,
+  REST,2, NOTE_B4,8, NOTE_CS5,8, NOTE_D5,8, NOTE_B4,8,
+  REST,8, NOTE_E5,8, NOTE_FS5,8, NOTE_E5,-4, NOTE_A4,16, NOTE_B4,16, NOTE_D5,16, NOTE_B4,16,
+  NOTE_FS5,-8, NOTE_FS5,-8, NOTE_E5,-4, NOTE_A4,16, NOTE_B4,16, NOTE_D5,16, NOTE_B4,16,
+
+  NOTE_E5,-8, NOTE_E5,-8, NOTE_D5,-8, NOTE_CS5,16, NOTE_B4,-8, NOTE_A4,16, NOTE_B4,16, NOTE_D5,16, NOTE_B4,16, //18
+  NOTE_D5,4, NOTE_E5,8, NOTE_CS5,-8, NOTE_B4,16, NOTE_A4,8, NOTE_A4,8, NOTE_A4,8, 
+  NOTE_E5,4, NOTE_D5,2, NOTE_A4,16, NOTE_B4,16, NOTE_D5,16, NOTE_B4,16,
+  NOTE_FS5,-8, NOTE_FS5,-8, NOTE_E5,-4, NOTE_A4,16, NOTE_B4,16, NOTE_D5,16, NOTE_B4,16,
+  NOTE_A5,4, NOTE_CS5,8, NOTE_D5,-8, NOTE_CS5,16, NOTE_B4,8, NOTE_A4,16, NOTE_B4,16, NOTE_D5,16, NOTE_B4,16,
+
+  NOTE_D5,4, NOTE_E5,8, NOTE_CS5,-8, NOTE_B4,16, NOTE_A4,4, NOTE_A4,8,  //23
+  NOTE_E5,4, NOTE_D5,2, REST,4,
+  REST,8, NOTE_B4,8, NOTE_D5,8, NOTE_B4,8, NOTE_D5,8, NOTE_E5,4, REST,8,
+  REST,8, NOTE_CS5,8, NOTE_B4,8, NOTE_A4,-4, REST,4,
+  REST,8, NOTE_B4,8, NOTE_B4,8, NOTE_CS5,8, NOTE_D5,8, NOTE_B4,8, NOTE_A4,4,
+  REST,8, NOTE_A5,8, NOTE_A5,8, NOTE_E5,8, NOTE_FS5,8, NOTE_E5,8, NOTE_D5,8,
+  
+  REST,8, NOTE_A4,8, NOTE_B4,8, NOTE_CS5,8, NOTE_D5,8, NOTE_B4,8, //29
+  REST,8, NOTE_CS5,8, NOTE_B4,8, NOTE_A4,-4, REST,4,
+  NOTE_B4,8, NOTE_B4,8, NOTE_CS5,8, NOTE_D5,8, NOTE_B4,8, NOTE_A4,4, REST,8,
+  REST,8, NOTE_E5,8, NOTE_E5,8, NOTE_FS5,4, NOTE_E5,-4, 
+  NOTE_D5,2, NOTE_D5,8, NOTE_E5,8, NOTE_FS5,8, NOTE_E5,4, 
+  NOTE_E5,8, NOTE_E5,8, NOTE_FS5,8, NOTE_E5,8, NOTE_A4,8, NOTE_A4,4,
+
+  REST,-4, NOTE_A4,8, NOTE_B4,8, NOTE_CS5,8, NOTE_D5,8, NOTE_B4,8, //35
+  REST,8, NOTE_E5,8, NOTE_FS5,8, NOTE_E5,-4, NOTE_A4,16, NOTE_B4,16, NOTE_D5,16, NOTE_B4,16,
+  NOTE_FS5,-8, NOTE_FS5,-8, NOTE_E5,-4, NOTE_A4,16, NOTE_B4,16, NOTE_D5,16, NOTE_B4,16,
+  NOTE_E5,-8, NOTE_E5,-8, NOTE_D5,-8, NOTE_CS5,16, NOTE_B4,8, NOTE_A4,16, NOTE_B4,16, NOTE_D5,16, NOTE_B4,16,
+  NOTE_D5,4, NOTE_E5,8, NOTE_CS5,-8, NOTE_B4,16, NOTE_A4,4, NOTE_A4,8, 
+
+   NOTE_E5,4, NOTE_D5,2, NOTE_A4,16, NOTE_B4,16, NOTE_D5,16, NOTE_B4,16, //40
+  NOTE_FS5,-8, NOTE_FS5,-8, NOTE_E5,-4, NOTE_A4,16, NOTE_B4,16, NOTE_D5,16, NOTE_B4,16,
+  NOTE_A5,4, NOTE_CS5,8, NOTE_D5,-8, NOTE_CS5,16, NOTE_B4,8, NOTE_A4,16, NOTE_B4,16, NOTE_D5,16, NOTE_B4,16,
+  NOTE_D5,4, NOTE_E5,8, NOTE_CS5,-8, NOTE_B4,16, NOTE_A4,4, NOTE_A4,8,  
+  NOTE_E5,4, NOTE_D5,2, NOTE_A4,16, NOTE_B4,16, NOTE_D5,16, NOTE_B4,16,
+   
+  NOTE_FS5,-8, NOTE_FS5,-8, NOTE_E5,-4, NOTE_A4,16, NOTE_B4,16, NOTE_D5,16, NOTE_B4,16, //45
+  NOTE_A5,4, NOTE_CS5,8, NOTE_D5,-8, NOTE_CS5,16, NOTE_B4,8, NOTE_A4,16, NOTE_B4,16, NOTE_D5,16, NOTE_B4,16,
+  NOTE_D5,4, NOTE_E5,8, NOTE_CS5,-8, NOTE_B4,16, NOTE_A4,4, NOTE_A4,8,  
+  NOTE_E5,4, NOTE_D5,2, NOTE_A4,16, NOTE_B4,16, NOTE_D5,16, NOTE_B4,16,
+  NOTE_FS5,-8, NOTE_FS5,-8, NOTE_E5,-4, NOTE_A4,16, NOTE_B4,16, NOTE_D5,16, NOTE_B4,16, //45
+  
+  NOTE_A5,4, NOTE_CS5,8, NOTE_D5,-8, NOTE_CS5,16, NOTE_B4,8, NOTE_A4,16, NOTE_B4,16, NOTE_D5,16, NOTE_B4,16,
+  NOTE_D5,4, NOTE_E5,8, NOTE_CS5,-8, NOTE_B4,16, NOTE_A4,4, NOTE_A4,8, 
+
+  NOTE_E5,4, NOTE_D5,2, REST,4
+};
+
+const int melody2[] PROGMEM = {
+  
+  NOTE_E5, 4,  NOTE_B4,8,  NOTE_C5,8,  NOTE_D5,4,  NOTE_C5,8,  NOTE_B4,8,
+  NOTE_A4, 4,  NOTE_A4,8,  NOTE_C5,8,  NOTE_E5,4,  NOTE_D5,8,  NOTE_C5,8,
+  NOTE_B4, -4,  NOTE_C5,8,  NOTE_D5,4,  NOTE_E5,4,
+  NOTE_C5, 4,  NOTE_A4,4,  NOTE_A4,4, REST,4,
+
+  REST,8, NOTE_D5, 4,  NOTE_F5,8,  NOTE_A5,4,  NOTE_G5,8,  NOTE_F5,8,
+  NOTE_E5, -4,  NOTE_C5,8,  NOTE_E5,4,  NOTE_D5,8,  NOTE_C5,8,
+  NOTE_B4, 4,  NOTE_B4,8,  NOTE_C5,8,  NOTE_D5,4,  NOTE_E5,4,
+  NOTE_C5, 4,  NOTE_A4,4,  NOTE_A4,4, REST, 4,
+
+  NOTE_E5,2, NOTE_C5,2,
+  NOTE_D5,2, NOTE_B4,2,
+  NOTE_C5,2, NOTE_A4,2,
+  NOTE_B4,1,
+
+  NOTE_E5,2, NOTE_C5,2,
+  NOTE_D5,2, NOTE_B4,2,
+  NOTE_C5,4, NOTE_E5,4, NOTE_A5,2,
+  NOTE_GS5,1,
+
+  NOTE_E5, 4,  NOTE_B4,8,  NOTE_C5,8,  NOTE_D5,4,  NOTE_C5,8,  NOTE_B4,8,
+  NOTE_A4, 4,  NOTE_A4,8,  NOTE_C5,8,  NOTE_E5,4,  NOTE_D5,8,  NOTE_C5,8,
+  NOTE_B4, -4,  NOTE_C5,8,  NOTE_D5,4,  NOTE_E5,4,
+  NOTE_C5, 4,  NOTE_A4,4,  NOTE_A4,4, REST,4,
+
+  REST,8, NOTE_D5, 4,  NOTE_F5,8,  NOTE_A5,4,  NOTE_G5,8,  NOTE_F5,8,
+  REST,8, NOTE_E5, 4,  NOTE_C5,8,  NOTE_E5,4,  NOTE_D5,8,  NOTE_C5,8,
+  REST,8, NOTE_B4, 4,  NOTE_C5,8,  NOTE_D5,4,  NOTE_E5,4,
+  REST,8, NOTE_C5, 4,  NOTE_A4,8,  NOTE_A4,4, REST, 4,
+
+};
+
+const int melody3[] PROGMEM = {
+  
+    NOTE_C4,4, NOTE_E4,4, NOTE_G4,4, NOTE_E4,4, 
+    NOTE_C4,4, NOTE_E4,8, NOTE_G4,-4, NOTE_E4,4,
+    NOTE_A3,4, NOTE_C4,4, NOTE_E4,4, NOTE_C4,4,
+    NOTE_A3,4, NOTE_C4,8, NOTE_E4,-4, NOTE_C4,4,
+    NOTE_G3,4, NOTE_B3,4, NOTE_D4,4, NOTE_B3,4,
+    NOTE_G3,4, NOTE_B3,8, NOTE_D4,-4, NOTE_B3,4,
+
+    NOTE_G3,4, NOTE_G3,8, NOTE_G3,-4, NOTE_G3,8, NOTE_G3,4, 
+    NOTE_G3,4, NOTE_G3,4, NOTE_G3,8, NOTE_G3,4,
+    NOTE_C4,4, NOTE_E4,4, NOTE_G4,4, NOTE_E4,4, 
+    NOTE_C4,4, NOTE_E4,8, NOTE_G4,-4, NOTE_E4,4,
+    NOTE_A3,4, NOTE_C4,4, NOTE_E4,4, NOTE_C4,4,
+    NOTE_A3,4, NOTE_C4,8, NOTE_E4,-4, NOTE_C4,4,
+    NOTE_G3,4, NOTE_B3,4, NOTE_D4,4, NOTE_B3,4,
+    NOTE_G3,4, NOTE_B3,8, NOTE_D4,-4, NOTE_B3,4,
+
+    NOTE_G3,-1, 
+  
+};
+
+const int melody4[] PROGMEM = {
+	NOTE_AS4,-2,  NOTE_F4,8,  NOTE_F4,8,  NOTE_AS4,8,//1
+  NOTE_GS4,16,  NOTE_FS4,16,  NOTE_GS4,-2,
+  NOTE_AS4,-2,  NOTE_FS4,8,  NOTE_FS4,8,  NOTE_AS4,8,
+  NOTE_A4,16,  NOTE_G4,16,  NOTE_A4,-2,
+  REST,1, 
+
+  NOTE_AS4,4,  NOTE_F4,-4,  NOTE_AS4,8,  NOTE_AS4,16,  NOTE_C5,16, NOTE_D5,16, NOTE_DS5,16,//7
+  NOTE_F5,2,  NOTE_F5,8,  NOTE_F5,8,  NOTE_F5,8,  NOTE_FS5,16, NOTE_GS5,16,
+  NOTE_AS5,-2,  NOTE_AS5,8,  NOTE_AS5,8,  NOTE_GS5,8,  NOTE_FS5,16,
+  NOTE_GS5,-8,  NOTE_FS5,16,  NOTE_F5,2,  NOTE_F5,4, 
+
+  NOTE_DS5,-8, NOTE_F5,16, NOTE_FS5,2, NOTE_F5,8, NOTE_DS5,8, //11
+  NOTE_CS5,-8, NOTE_DS5,16, NOTE_F5,2, NOTE_DS5,8, NOTE_CS5,8,
+  NOTE_C5,-8, NOTE_D5,16, NOTE_E5,2, NOTE_G5,8, 
+  NOTE_F5,16, NOTE_F4,16, NOTE_F4,16, NOTE_F4,16,NOTE_F4,16,NOTE_F4,16,NOTE_F4,16,NOTE_F4,16,NOTE_F4,8, NOTE_F4,16,NOTE_F4,8,
+
+  NOTE_AS4,4,  NOTE_F4,-4,  NOTE_AS4,8,  NOTE_AS4,16,  NOTE_C5,16, NOTE_D5,16, NOTE_DS5,16,//15
+  NOTE_F5,2,  NOTE_F5,8,  NOTE_F5,8,  NOTE_F5,8,  NOTE_FS5,16, NOTE_GS5,16,
+  NOTE_AS5,-2, NOTE_CS6,4,
+  NOTE_C6,4, NOTE_A5,2, NOTE_F5,4,
+  NOTE_FS5,-2, NOTE_AS5,4,
+  NOTE_A5,4, NOTE_F5,2, NOTE_F5,4,
+
+  NOTE_FS5,-2, NOTE_AS5,4,
+  NOTE_A5,4, NOTE_F5,2, NOTE_D5,4,
+  NOTE_DS5,-2, NOTE_FS5,4,
+  NOTE_F5,4, NOTE_CS5,2, NOTE_AS4,4,
+  NOTE_C5,-8, NOTE_D5,16, NOTE_E5,2, NOTE_G5,8, 
+  NOTE_F5,16, NOTE_F4,16, NOTE_F4,16, NOTE_F4,16,NOTE_F4,16,NOTE_F4,16,NOTE_F4,16,NOTE_F4,16,NOTE_F4,8, NOTE_F4,16,NOTE_F4,8
+  
+};
+
+const int melody5[] PROGMEM = {
+
+  NOTE_E4,2, NOTE_G4,4,
+  NOTE_D4,2, NOTE_C4,8, NOTE_D4,8, 
+  NOTE_E4,2, NOTE_G4,4,
+  NOTE_D4,-2,
+  NOTE_E4,2, NOTE_G4,4,
+  NOTE_D5,2, NOTE_C5,4,
+  NOTE_G4,2, NOTE_F4,8, NOTE_E4,8, 
+  NOTE_D4,-2,
+  NOTE_E4,2, NOTE_G4,4,
+  NOTE_D4,2, NOTE_C4,8, NOTE_D4,8, 
+  NOTE_E4,2, NOTE_G4,4,
+  NOTE_D4,-2,
+  NOTE_E4,2, NOTE_G4,4,
+
+  NOTE_D5,2, NOTE_C5,4,
+  NOTE_G4,2, NOTE_F4,8, NOTE_E4,8, 
+  NOTE_F4,8, NOTE_E4,8, NOTE_C4,2,
+  NOTE_F4,2, NOTE_E4,8, NOTE_D4,8, 
+  NOTE_E4,8, NOTE_D4,8, NOTE_A3,2,
+  NOTE_G4,2, NOTE_F4,8, NOTE_E4,8, 
+  NOTE_F4,8, NOTE_E4,8, NOTE_C4,4, NOTE_F4,4,
+  NOTE_C5,-2, 
+  
+};
+//SONG LIST
+
+const int SONG_COUNT = 5;
+
+const char songName0[] PROGMEM = "Rick Astley";
+const char songName1[] PROGMEM = "Tetris";
+const char songName2[] PROGMEM = "Keyboard Cat";
+const char songName3[] PROGMEM = "Zelda's Theme";
+const char songName4[] PROGMEM = "Zelda's Lullaby";
+  
+const char* const songNames[] PROGMEM =
+{
+    songName0,
+    songName1,
+    songName2,
+	songName3,
+  	songName4,
+};
+
+const int notes1 =
+    sizeof(melody1) / sizeof(melody1[0]) / 2;
+
+const int notes2 =
+    sizeof(melody2) / sizeof(melody2[0]) / 2;
+
+const int notes3 =
+    sizeof(melody3) / sizeof(melody3[0]) / 2;
+
+const int notes4 =
+    sizeof(melody4) / sizeof(melody4[0]) / 2;
+
+const int notes5 =
+    sizeof(melody5) / sizeof(melody1[0]) / 2;
+
+const int songTempos[] =
+{
+    114,  // Rick Astley
+    144,  // Tetris
+    180,  // Keyboard Cat
+	88 ,   // Zelda's Theme
+  	108,  // Zelda's Lullaby
+};
+
+const int* melodies[] =
+{
+    melody1,
+    melody2,
+    melody3,
+  	melody4,
+  	melody5,
+};
+
+int noteCounts[] =
+{
+    notes1,
+    notes2,
+    notes3,
+    notes4,
+  	notes5,
+};
+
+void setup()
+{
+    pinMode(backButton, INPUT_PULLUP);
+    pinMode(pauseButton, INPUT_PULLUP);
+    pinMode(nextButton, INPUT_PULLUP);
+
+    pinMode(buzzer, OUTPUT);
+
+    lcd.begin(16, 2);
+    lcd.clear();
+    lcd.setCursor(0,0);
+}
+
+void changeSong(int newSong)
+{
+    currentSong = newSong;
+
+   if (currentSong < 0)
+    currentSong = SONG_COUNT - 1;
+
+if (currentSong >= SONG_COUNT)
+    currentSong = 0;
+
+    noteIndex = 0;
+    notePlaying = false;
+
+    noTone(buzzer);
+}
+
+void playCurrentSong(const int *melody, int notes)
+{
+    if (paused)
+        return;
+
+    if (!notePlaying)
+    {
+        if (noteIndex >= notes * 2)
+        {
+            noteIndex = 0;
+            return;
+        }
+
+        int note =
+    	pgm_read_word_near(melody + noteIndex);
+
+		int divider =
+    	pgm_read_word_near(melody + noteIndex + 1);
+	
+      	int wholenote =
+        (60000 * 4) / songTempos[currentSong];
+
+        if (divider > 0)
+        {
+            noteDuration = wholenote / divider;
+        }
+        else
+        {
+            noteDuration = wholenote / abs(divider);
+            noteDuration = noteDuration * 3 / 2;
+        }
+
+        if (note != REST)
+        {
+         tone(buzzer, note);
+        }
+
+        noteStartTime = millis();
+        notePlaying = true;
+    }
+
+    if (millis() - noteStartTime >= noteDuration)
+    {
+        noTone(buzzer);
+
+        noteIndex += 2;
+        notePlaying = false;
+    }
+}
+   
 
 
-# Fortran module files
-*.mod
-*.smod
+void loop()
+{
+    if (digitalRead(nextButton) == LOW)
+    {
+        changeSong(currentSong + 1);
 
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
+        while (digitalRead(nextButton) == LOW)
+        {
+        }
+    }
 
-# Executables
-*.exe
-*.out
-*.app
+    if (digitalRead(backButton) == LOW)
+    {
+        changeSong(currentSong - 1);
 
-# Build directories
-build/
-Build/
-build-*/
+        while (digitalRead(backButton) == LOW)
+        {
+        }
+    }
+	if (digitalRead(pauseButton) == LOW)
+{
+    paused = !paused;
 
-# CMake generated files
-CMakeFiles/
-CMakeCache.txt
-cmake_install.cmake
-Makefile
-install_manifest.txt
-compile_commands.json
+    if (paused)
+    {
+        noTone(buzzer);
+        pauseStartTime = millis();
+    }
+    else
+    {
+        unsigned long pauseLength = millis() - pauseStartTime;
+        noteStartTime += pauseLength;
+    }
 
-# Temporary files
-*.tmp
-*.log
-*.bak
-*.swp
+    while (digitalRead(pauseButton) == LOW)
+    {
+    }
 
-# vcpkg
-vcpkg_installed/
+    delay(30); 
+}
 
-# debug information files
-*.dwo
+   lcd.setCursor(0,0);
+	
+  	lcd.setCursor(0, 0);
+lcd.print(F("                "));
 
-# test output & cache
-Testing/
-.cache/
+lcd.setCursor(0, 0);
+
+char selectedSongName[17];
+
+strcpy_P(
+    selectedSongName,
+    (const char*)pgm_read_ptr(&songNames[currentSong])
+);
+
+lcd.print(selectedSongName);
+
+playCurrentSong(
+	
+    melodies[currentSong],
+    noteCounts[currentSong]
+);
+
+    lcd.setCursor(0,1);
+
+    if (paused)
+    {
+        lcd.print(F("PAUSED         "));
+    }
+    else
+    {
+        lcd.print(F("<- || ->       "));
+    }
+}
